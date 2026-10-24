@@ -22,7 +22,7 @@ BLINKO_API_URL = os.environ["BLINKO_API_URL"].rstrip("/")
 BLINKO_API_KEY = os.environ["BLINKO_API_KEY"]
 
 
-async def save_note(content: str):
+async def save_note(content: str) -> tuple[int, str]:
     async with httpx.AsyncClient(timeout=30) as client:
         resp = await client.post(
             f"{BLINKO_API_URL}/api/agent/note",
@@ -47,14 +47,14 @@ async def on_message(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
         return
     try:
         status, body = await save_note(text.strip())
-        if status == 200:
-            await update.message.reply_text("Saved to Blinko ✔")
+        if 200 <= status < 300:
+            await update.message.reply_text("Saved to Blinko \u2714")
         else:
             log.error("blinko api %s: %s", status, body[:300])
             await update.message.reply_text(f"Blinko returned error {status}.")
     except Exception:
         log.exception("failed to save note")
-        await update.message.reply_text("Save failed — check the bridge logs.")
+        await update.message.reply_text("Save failed \u2014 check the bridge logs.")
 
 
 def main() -> None:
