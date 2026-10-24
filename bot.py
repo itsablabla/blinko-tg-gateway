@@ -12,6 +12,8 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 
 logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s: %(message)s", level=logging.INFO)
+# httpx logs request URLs at INFO (they contain the bot token) - silence it.
+logging.getLogger("httpx").setLevel(logging.WARNING)
 log = logging.getLogger("blinko-tg")
 
 TELEGRAM_BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
@@ -56,6 +58,7 @@ async def on_message(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 def main() -> None:
+    logging.getLogger("httpx").setLevel(logging.WARNING)
     app = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_message))
